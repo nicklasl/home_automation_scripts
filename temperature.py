@@ -45,3 +45,4 @@ for device_folder in device_folders:
 	result.append(device_file + " --- " + now + " --- " +  str(temp))
 
 print(result)
+#append_to_file(result)
