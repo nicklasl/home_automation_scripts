@@ -1,3 +1,10 @@
+This is a place to keep all my scripts and stuff used for the home automation/home monitoring system.
+Most of the code is "borrowed"... 
+So some credit!!!:
+https://learn.adafruit.com/adafruits-raspberry-pi-lesson-11-ds18b20-temperature-sensing/ds18b20
+https://github.com/seanbechhofer/raspberrypi
+and also...
+
 Adafruit's Raspberry-Pi Python Code Library
 ============
   Here is a growing collection of libraries and example python scripts
