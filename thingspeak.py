@@ -3,7 +3,7 @@ import httplib, urllib, config
 #originally from https://github.com/seanbechhofer/raspberrypi/blob/master/python/thingspeak.py
 
 KEY = config.key('THINGSPEAK_API_KEY')
-print KEY
+#print KEY
 
 def log(dataToSend,verbose=False):
     dataToSend['api_key'] = KEY
