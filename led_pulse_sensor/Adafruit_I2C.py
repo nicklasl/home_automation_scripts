@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import re
 
-#package on raspberry pi
+#package on raspberry pi sudo apt-get install python-smbus
 import smbus
 
 
