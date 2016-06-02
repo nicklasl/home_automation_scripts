@@ -89,3 +89,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+.DS_Store
+._.DS_Store
+.idea/
+home_automation.iml
