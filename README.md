@@ -8,6 +8,8 @@ https://learn.adafruit.com/adafruits-raspberry-pi-lesson-11-ds18b20-temperature-
 
 https://github.com/seanbechhofer/raspberrypi
 
+https://github.com/IainColledge/Adafruit-Raspberry-Pi-Python-Code
+
 
 and also...
 
