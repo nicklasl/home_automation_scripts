@@ -2,8 +2,12 @@ import datetime
 import glob
 import os
 import time
+import sys
 
-import thingspeak
+# Path hack.
+sys.path.insert(0, os.path.abspath('..'))
+
+import reporting.thingspeak as thingspeak
 
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
