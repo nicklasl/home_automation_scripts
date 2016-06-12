@@ -13,10 +13,10 @@ import RPi.GPIO as GPIO
 # Path hack.
 sys.path.insert(0, os.path.abspath('..'))
 
+LUX_THRESHOLD = 5
 HIGH = "HIGH"
 LOW = "LOW"
 REPORT_PERIOD_SECONDS = 5  # 5 * 60
-
 LED_PIN = 18
 
 previous_light_level = LOW
@@ -27,17 +27,17 @@ pulses = 0
 def read_lux():
     try:
         lux = sensor.calculate_lux()
-        print "{} = {}".format("lux", lux)
-        # TODO fix this to measure against a threshold value
-        if lux % 2 == 0:
+        if lux > 1:
+            print "{} = {}".format("lux", lux)
+        if lux > LUX_THRESHOLD:
             lux = HIGH
         else:
             lux = LOW
-        return lux
     except OverflowError as e:
         print(e)
         #TODO report this somehow!
-        return HIGH
+        lux = HIGH
+    return lux
 
 
 def report():
