@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
+import os
+import sys
 # Path hack.
 sys.path.insert(0, os.path.abspath('..'))
 
 import reporting.thingspeak as thingspeak
 import datetime
-import os
-import sys
 import time
 import threading
 import RPi.GPIO as GPIO
