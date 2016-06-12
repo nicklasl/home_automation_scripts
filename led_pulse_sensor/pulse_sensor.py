@@ -2,8 +2,11 @@
 import datetime
 import os
 import sys
+import time
+import threading
 
-from Adafruit_TSL2561 import Adafruit_TSL2561
+
+#from Adafruit_TSL2561 import Adafruit_TSL2561
 
 # import RPi.GPIO as GPIO
 
@@ -20,13 +23,14 @@ pulses = 0
 
 def read_lux():
     try:
-
         lux = sensor.calculate_lux()
+        # lux = datetime.datetime.now().second #debug
         # TODO fix this to measure against a threshold value
         if lux % 2 == 0:
-            return HIGH
+            lux = HIGH
         else:
-            return LOW
+            lux = LOW
+        return lux
     except OverflowError as e:
         print(e)
         #TODO report this somehow!
@@ -36,7 +40,9 @@ def read_lux():
 def report():
     global last_report
     global pulses
-    # TODO do real reporting using some async non blocking stuff
+    # TODO do real reporting
+    print "started reporting... sleeping 3 sec"
+    time.sleep(3)
     print "reporting %i pulses" % pulses
     last_report = datetime.datetime.now().second
     pulses = 0
@@ -45,6 +51,13 @@ def report():
 def handle_control_led(light_level):
     # TODO handle control led
     pass
+
+
+def report_async():
+    print "before thread start"
+    thr = threading.Thread(target=report, args=(), kwargs={})
+    thr.start() # will run "report"
+    print "after thread start"
 
 
 def loop():
@@ -56,7 +69,7 @@ def loop():
         if previous_light_level == HIGH and light_level == LOW:
             pulses += 1
         if datetime.datetime.now().second - last_report >= REPORT_PERIOD_SECONDS:
-            report()
+            report_async()
         previous_light_level = light_level
 
 
