@@ -6,7 +6,7 @@ import time
 import threading
 
 
-#from Adafruit_TSL2561 import Adafruit_TSL2561
+from Adafruit_TSL2561 import Adafruit_TSL2561
 
 # import RPi.GPIO as GPIO
 
