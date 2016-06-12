@@ -8,7 +8,7 @@ import threading
 
 from Adafruit_TSL2561 import Adafruit_TSL2561
 
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 # Path hack.
 sys.path.insert(0, os.path.abspath('..'))
@@ -16,6 +16,8 @@ sys.path.insert(0, os.path.abspath('..'))
 HIGH = "HIGH"
 LOW = "LOW"
 REPORT_PERIOD_SECONDS = 5  # 5 * 60
+
+LED_PIN = 18
 
 previous_light_level = LOW
 last_report_initiated = 0
@@ -26,7 +28,6 @@ def read_lux():
     try:
         lux = sensor.calculate_lux()
         print "{} = {}".format("lux", lux)
-        # lux = datetime.datetime.now().second #debug
         # TODO fix this to measure against a threshold value
         if lux % 2 == 0:
             lux = HIGH
@@ -49,8 +50,10 @@ def report():
 
 
 def handle_control_led(light_level):
-    # TODO handle control led
-    pass
+    if light_level == HIGH:
+        GPIO.output(LED_PIN, GPIO.HIGH)
+    else:
+        GPIO.output(LED_PIN, GPIO.LOW)
 
 
 def report_async():
@@ -84,11 +87,15 @@ def setup():
     # Default is False
     sensor.enable_auto_gain(True)
 
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(LED_PIN, GPIO.OUT)
+    GPIO.output(LED_PIN, GPIO.LOW)
+
 
 try:
     setup()
     loop()
-# Stop on Ctrl+C and clean up
+    # Stop on Ctrl+C and clean up
 except KeyboardInterrupt:
-    # GPIO.cleanup()
+    GPIO.cleanup()
     print "exiting"
