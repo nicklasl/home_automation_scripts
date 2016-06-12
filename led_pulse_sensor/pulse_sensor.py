@@ -18,7 +18,7 @@ from Adafruit_TSL2561 import Adafruit_TSL2561
 LUX_THRESHOLD = 2
 HIGH = "HIGH"
 LOW = "LOW"
-REPORT_PERIOD_SECONDS = 5 * 60
+REPORT_PERIOD_SECONDS = 5 #* 60
 LED_PIN = 18
 
 previous_light_level = LOW
@@ -47,8 +47,8 @@ def report():
     global pulses
     last_report_initiated = datetime.datetime.now().second
     data = {'field3': str(pulses)}
+    print "reporting pulses = {}".format(data)
     thingspeak.log(data, True)
-    print "reporting %i pulses" % pulses
     pulses = 0
 
 
