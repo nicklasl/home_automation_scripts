@@ -26,7 +26,8 @@ pulses = 0
 def read_lux():
     try:
         lux = sensor.calculate_lux()
-        print "{} = {}".format("lux", lux)
+        if lux > 0:
+            print "{} = {}".format("lux", lux)
         if lux > LUX_THRESHOLD:
             lux = HIGH
         else:
