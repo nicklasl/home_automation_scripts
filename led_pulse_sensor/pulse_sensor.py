@@ -1,21 +1,24 @@
 #!/usr/bin/python
+
+# Path hack.
+sys.path.insert(0, os.path.abspath('..'))
+
+import reporting.thingspeak as thingspeak
 import datetime
 import os
 import sys
 import time
 import threading
-
+import RPi.GPIO as GPIO
 from Adafruit_TSL2561 import Adafruit_TSL2561
 
-import RPi.GPIO as GPIO
 
-# Path hack.
-sys.path.insert(0, os.path.abspath('..'))
 
-LUX_THRESHOLD = 5
+
+LUX_THRESHOLD = 2
 HIGH = "HIGH"
 LOW = "LOW"
-REPORT_PERIOD_SECONDS = 5  # 5 * 60
+REPORT_PERIOD_SECONDS = 5 * 60
 LED_PIN = 18
 
 previous_light_level = LOW
@@ -43,7 +46,8 @@ def report():
     global last_report_initiated
     global pulses
     last_report_initiated = datetime.datetime.now().second
-    # TODO do real reporting
+    data = {'field3': str(pulses)}
+    thingspeak.log(data, True)
     print "reporting %i pulses" % pulses
     pulses = 0
 
