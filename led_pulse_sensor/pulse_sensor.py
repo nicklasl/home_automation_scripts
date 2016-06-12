@@ -5,7 +5,6 @@ import sys
 import time
 import threading
 
-
 from Adafruit_TSL2561 import Adafruit_TSL2561
 
 import RPi.GPIO as GPIO
@@ -35,7 +34,7 @@ def read_lux():
             lux = LOW
     except OverflowError as e:
         print(e)
-        #TODO report this somehow!
+        # TODO report this somehow!
         lux = HIGH
     return lux
 
@@ -67,8 +66,11 @@ def loop():
     while True:
         light_level = read_lux()
         handle_control_led(light_level)
+        print "Current light level = " + light_level
         if previous_light_level == HIGH and light_level == LOW:
             pulses += 1
+        print "datetime.datetime.now().second - last_report_initiated = {}".format(
+            datetime.datetime.now().second - last_report_initiated)
         if datetime.datetime.now().second - last_report_initiated >= REPORT_PERIOD_SECONDS:
             report_async()
         previous_light_level = light_level
