@@ -64,16 +64,15 @@ def loop():
     global previous_light_level
     global pulses
     while True:
-        light_level = read_lux()
-        handle_control_led(light_level)
-        print "Current light level = " + light_level
-        if previous_light_level == HIGH and light_level == LOW:
+        current_light_level = read_lux()
+        handle_control_led(current_light_level)
+        print "Current light level = " + current_light_level
+        if previous_light_level == HIGH and current_light_level == LOW:
+            print "registering pulse"
             pulses += 1
-        print "datetime.datetime.now().second - last_report_initiated = {}".format(
-            datetime.datetime.now().second - last_report_initiated)
         if datetime.datetime.now().second - last_report_initiated >= REPORT_PERIOD_SECONDS:
             report_async()
-        previous_light_level = light_level
+        previous_light_level = current_light_level
 
 
 def setup():
