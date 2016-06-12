@@ -66,7 +66,6 @@ def loop():
     while True:
         current_light_level = read_lux()
         handle_control_led(current_light_level)
-        print "Current light level = " + current_light_level
         if previous_light_level == HIGH and current_light_level == LOW:
             print "registering pulse"
             pulses += 1
