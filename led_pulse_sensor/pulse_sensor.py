@@ -18,6 +18,7 @@ LOW = "LOW"
 REPORT_PERIOD_SECONDS = 5  # 5 * 60
 
 previous_light_level = LOW
+last_report_initiated = 0
 pulses = 0
 
 
@@ -38,13 +39,11 @@ def read_lux():
 
 
 def report():
-    global last_report
+    global last_report_initiated
     global pulses
+    last_report_initiated = datetime.datetime.now().second
     # TODO do real reporting
-    print "started reporting... sleeping 3 sec"
-    time.sleep(3)
     print "reporting %i pulses" % pulses
-    last_report = datetime.datetime.now().second
     pulses = 0
 
 
@@ -54,10 +53,8 @@ def handle_control_led(light_level):
 
 
 def report_async():
-    print "before thread start"
     thr = threading.Thread(target=report, args=(), kwargs={})
-    thr.start() # will run "report"
-    print "after thread start"
+    thr.start()
 
 
 def loop():
@@ -68,16 +65,16 @@ def loop():
         handle_control_led(light_level)
         if previous_light_level == HIGH and light_level == LOW:
             pulses += 1
-        if datetime.datetime.now().second - last_report >= REPORT_PERIOD_SECONDS:
+        if datetime.datetime.now().second - last_report_initiated >= REPORT_PERIOD_SECONDS:
             report_async()
         previous_light_level = light_level
 
 
 def setup():
     global sensor
-    global last_report
+    global last_report_initiated
 
-    last_report = datetime.datetime.now().second
+    last_report_initiated = datetime.datetime.now().second
 
     # Initialise the sensor
     sensor = Adafruit_TSL2561()
