@@ -25,6 +25,7 @@ pulses = 0
 def read_lux():
     try:
         lux = sensor.calculate_lux()
+        print "{} = {}".format("lux", lux)
         # lux = datetime.datetime.now().second #debug
         # TODO fix this to measure against a threshold value
         if lux % 2 == 0:
