@@ -2,27 +2,24 @@
 
 import os
 import sys
+
 # Path hack.
 sys.path.insert(0, os.path.abspath('..'))
 
 import reporting.thingspeak as thingspeak
-import datetime
-import time
+from datetime import datetime
 import threading
 import RPi.GPIO as GPIO
 from Adafruit_TSL2561 import Adafruit_TSL2561
 
-
-
-
 LUX_THRESHOLD = 2
 HIGH = "HIGH"
 LOW = "LOW"
-REPORT_PERIOD_SECONDS = 5 #* 60
+REPORT_PERIOD_SECONDS = 5 * 60
 LED_PIN = 18
 
 previous_light_level = LOW
-last_report_initiated = 0
+last_report_initiated = datetime.now()
 pulses = 0
 
 
@@ -30,7 +27,7 @@ def read_lux():
     try:
         lux = sensor.calculate_lux()
         if lux > 0:
-            print "{} = {}".format("lux", lux)
+            print "lux = {}".format(lux)
         if lux > LUX_THRESHOLD:
             lux = HIGH
         else:
@@ -45,7 +42,7 @@ def read_lux():
 def report():
     global last_report_initiated
     global pulses
-    last_report_initiated = datetime.datetime.now().second
+    last_report_initiated = datetime.now()
     data = {'field3': str(pulses)}
     print "reporting pulses = {}".format(data)
     thingspeak.log(data, True)
@@ -64,6 +61,10 @@ def report_async():
     thr.start()
 
 
+def should_report():
+    return (datetime.now() - last_report_initiated).total_seconds() > REPORT_PERIOD_SECONDS
+
+
 def loop():
     global previous_light_level
     global pulses
@@ -73,7 +74,7 @@ def loop():
         if previous_light_level == HIGH and current_light_level == LOW:
             print "registering pulse"
             pulses += 1
-        if datetime.datetime.now().second - last_report_initiated >= REPORT_PERIOD_SECONDS:
+        if should_report():
             report_async()
         previous_light_level = current_light_level
 
@@ -82,7 +83,7 @@ def setup():
     global sensor
     global last_report_initiated
 
-    last_report_initiated = datetime.datetime.now().second
+    last_report_initiated = datetime.now()
 
     # Initialise the sensor
     sensor = Adafruit_TSL2561()
