@@ -84,6 +84,9 @@ def loop():
 
 
 def setup():
+    logging.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.ERROR)
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
+
     global sensor
     global last_report_initiated
     last_report_initiated = datetime.now()
@@ -99,21 +102,13 @@ def setup():
     GPIO.setup(LED_PIN, GPIO.OUT)
     GPIO.output(LED_PIN, GPIO.LOW)
 
-def main():
-    try:
-        setup()
-        loop()
-    # Stop on Ctrl+C and clean up
-    except KeyboardInterrupt:
-        GPIO.cleanup()
-        print "exiting"
+try:
+    setup()
+    loop()
+# Stop on Ctrl+C and clean up
+except KeyboardInterrupt:
+    GPIO.cleanup()
+    print "exiting"
 
 
-print "name={}".format(__name__)
-
-if __name__ == '__main__':
-    import logging.config
-    logging.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.ERROR)
-    logging.getLogger(__name__).setLevel(logging.DEBUG)
-    main()
 
