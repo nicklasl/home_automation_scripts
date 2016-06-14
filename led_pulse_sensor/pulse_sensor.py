@@ -86,7 +86,7 @@ def loop():
 def setup():
     global sensor
     global last_report_initiated
-    logger.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.DEBUG)
     last_report_initiated = datetime.now()
 
     # Initialise the sensor
