@@ -6,6 +6,7 @@ import sys
 # Path hack.
 sys.path.insert(0, os.path.abspath('..'))
 
+import logging
 import reporting.thingspeak as thingspeak
 from datetime import datetime
 import threading
@@ -25,15 +26,14 @@ pulses = 0
 
 def read_lux():
     try:
-        lux = sensor.calculate_lux()
-        # if lux > 0:
-            # print "lux = {}".format(lux)
-        if lux > LUX_THRESHOLD:
+        lux_value = sensor.calculate_lux()
+        if lux_value > LUX_THRESHOLD:
+            logging.debug("lux = {}".format(lux_value))
             lux = HIGH
         else:
             lux = LOW
     except OverflowError as e:
-        print(e)
+        logging.error(e)
         # TODO report this somehow!
         lux = HIGH
     return lux
@@ -42,10 +42,11 @@ def read_lux():
 def report():
     global last_report_initiated
     global pulses
+    logging.debug("Reporting at {}. Last report was {}".format(datetime.now(), last_report_initiated))
     last_report_initiated = datetime.now()
     data = {'field3': str(pulses)}
-    print "reporting pulses = {}".format(data)
-    thingspeak.log(data, True)
+    logging.info("reporting pulses = {}".format(data))
+    thingspeak.log(data, False)
     pulses = 0
 
 
@@ -72,17 +73,18 @@ def loop():
         current_light_level = read_lux()
         handle_control_led(current_light_level)
         if previous_light_level == HIGH and current_light_level == LOW:
-            print "registering pulse"
+            logging.debug("registering pulse")
             pulses += 1
         if should_report():
             report_async()
+
         previous_light_level = current_light_level
 
 
 def setup():
     global sensor
     global last_report_initiated
-
+    logging.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.DEBUG)
     last_report_initiated = datetime.now()
 
     # Initialise the sensor

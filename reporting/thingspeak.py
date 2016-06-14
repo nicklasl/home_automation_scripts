@@ -7,8 +7,6 @@ import urllib
 KEY = config.key('THINGSPEAK_API_KEY')
 
 
-# print KEY
-
 def log(dataToSend, verbose=False):
     dataToSend['api_key'] = KEY
     if verbose:
@@ -21,4 +19,5 @@ def log(dataToSend, verbose=False):
     if verbose:
         print response.status, response.reason
     data = response.read()
+    # TODO handle network error and retry
     conn.close()
