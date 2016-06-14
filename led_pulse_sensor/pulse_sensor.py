@@ -7,7 +7,6 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 import logging
-logger = logging.getLogger(__name__)
 
 import reporting.thingspeak as thingspeak
 from datetime import datetime
@@ -21,6 +20,7 @@ LOW = "LOW"
 REPORT_PERIOD_SECONDS = 5 * 60
 LED_PIN = 18
 
+logger = logging.getLogger(__name__)
 previous_light_level = LOW
 last_report_initiated = datetime.now()
 pulses = 0
@@ -113,6 +113,7 @@ print "name={}".format(__name__)
 
 if __name__ == '__main__':
     import logging.config
-    logging.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.ERROR)
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
     main()
 
