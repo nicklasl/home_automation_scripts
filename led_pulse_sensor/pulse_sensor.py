@@ -41,15 +41,9 @@ def read_lux():
     return lux
 
 
-def report():
-    global last_report_initiated
-    global pulses
-    logger.debug("Reporting at {}. Last report was {}".format(datetime.now(), last_report_initiated))
-    last_report_initiated = datetime.now()
-    data = {'field3': str(pulses)}
+def report(data):
     logger.info("reporting pulses = {}".format(data))
     thingspeak.log(data, False)
-    pulses = 0
 
 
 def handle_control_led(light_level):
@@ -60,7 +54,13 @@ def handle_control_led(light_level):
 
 
 def report_async():
-    thr = threading.Thread(target=report, args=(), kwargs={})
+    global last_report_initiated
+    global pulses
+    logger.debug("Reporting at {}. Last report was {}".format(datetime.now(), last_report_initiated))
+    data = {'field3': str(pulses)}
+    pulses = 0
+    last_report_initiated = datetime.now()
+    thr = threading.Thread(target=report, args=data, kwargs={})
     thr.start()
 
 
