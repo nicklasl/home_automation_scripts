@@ -30,7 +30,7 @@ def read_lux():
     try:
         lux_value = sensor.calculate_lux()
         if lux_value > LUX_THRESHOLD:
-            logger.debug("lux = {}".format(lux_value))
+            #logger.debug("lux = {}".format(lux_value))
             lux = HIGH
         else:
             lux = LOW
@@ -60,7 +60,7 @@ def report_async():
     data = {'field3': str(pulses)}
     pulses = 0
     last_report_initiated = datetime.now()
-    thr = threading.Thread(target=report, args=data, kwargs={})
+    thr = threading.Thread(target=report, args=(data,), kwargs={})
     thr.start()
 
 
@@ -76,7 +76,7 @@ def loop():
         handle_control_led(current_light_level)
         if previous_light_level == HIGH and current_light_level == LOW:
             pulses += 1
-            logger.debug("registering pulse. ({})".format(pulses))
+            #logger.debug("registering pulse. ({})".format(pulses))
         if should_report():
             report_async()
 
@@ -98,6 +98,7 @@ def setup():
     # Default is False
     sensor.enable_auto_gain(True)
 
+    GPIO.cleanup()
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LED_PIN, GPIO.OUT)
     GPIO.output(LED_PIN, GPIO.LOW)
