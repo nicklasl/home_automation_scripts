@@ -75,8 +75,8 @@ def loop():
         current_light_level = read_lux()
         handle_control_led(current_light_level)
         if previous_light_level == HIGH and current_light_level == LOW:
-            logger.debug("registering pulse")
             pulses += 1
+            logger.debug("registering pulse. ({})".format(pulses))
         if should_report():
             report_async()
 
