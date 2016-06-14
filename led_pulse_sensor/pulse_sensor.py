@@ -43,7 +43,7 @@ def read_lux():
 
 def report(data):
     logger.info("reporting pulses = {}".format(data))
-    thingspeak.log(data, False)
+    thingspeak.log(data, True)
 
 
 def handle_control_led(light_level):
@@ -87,6 +87,8 @@ def setup():
     logging.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.ERROR)
     logging.getLogger(__name__).setLevel(logging.DEBUG)
 
+    thingspeak.setup_logger()
+
     global sensor
     global last_report_initiated
     last_report_initiated = datetime.now()
@@ -102,6 +104,7 @@ def setup():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LED_PIN, GPIO.OUT)
     GPIO.output(LED_PIN, GPIO.LOW)
+
 
 try:
     setup()
