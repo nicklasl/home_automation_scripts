@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import division
 
 import os
 import sys
@@ -9,7 +10,6 @@ sys.path.insert(0, os.path.abspath('..'))
 import logging
 import reporting.thingspeak as thingspeak
 from datetime import datetime
-from __future__ import division
 import threading
 import RPi.GPIO as GPIO
 from Adafruit_TSL2561 import Adafruit_TSL2561
