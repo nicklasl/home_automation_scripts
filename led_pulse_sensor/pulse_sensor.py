@@ -7,9 +7,9 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 import logging
-
 import reporting.thingspeak as thingspeak
 from datetime import datetime
+from __future__ import division
 import threading
 import RPi.GPIO as GPIO
 from Adafruit_TSL2561 import Adafruit_TSL2561
@@ -18,6 +18,7 @@ LUX_THRESHOLD = 5
 HIGH = "HIGH"
 LOW = "LOW"
 REPORT_PERIOD_SECONDS = 5 * 60
+MULTIPLIER_K_W_H = 3600 / REPORT_PERIOD_SECONDS / 1000
 LED_PIN = 18
 
 logger = logging.getLogger(__name__)
@@ -57,7 +58,11 @@ def report_async():
     global last_report_initiated
     global pulses
     logger.debug("Reporting at {}. Last report was {}".format(datetime.now(), last_report_initiated))
-    data = {'field3': str(pulses)}
+    k_w_h = pulses * MULTIPLIER_K_W_H
+    data = {
+        'field3': str(pulses),
+        'field4': str(k_w_h)
+    }
     pulses = 0
     last_report_initiated = datetime.now()
     thr = threading.Thread(target=report, args=(data,), kwargs={})
