@@ -105,7 +105,6 @@ def setup():
     # Default is False
     sensor.enable_auto_gain(True)
 
-    GPIO.cleanup()
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LED_PIN, GPIO.OUT)
     GPIO.output(LED_PIN, GPIO.LOW)
