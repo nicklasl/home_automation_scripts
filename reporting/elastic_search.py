@@ -9,8 +9,8 @@ es = Elasticsearch([ELASTIC_SEARCH_NODE_URI])
 
 
 def log(pulses, k_w_h, verbose=False):
-    data = {'pulses': pulses, 'kwh': k_w_h}
     timestamp = datetime.now()
+    data = {'pulses': pulses, 'kwh': k_w_h, 'timestamp' : timestamp}
     if verbose:
         logger.debug("indexing:".format(data))
 
