@@ -43,7 +43,6 @@ def read_lux():
 
 
 def report(pulses, kwh):
-    logger.debug("logging pulses={} kwh={}".format(pulses, kwh))
     elastic_search.log(pulses, kwh)
 
 
@@ -88,7 +87,7 @@ def setup():
     logging.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.ERROR)
     logging.getLogger(__name__).setLevel(logging.DEBUG)
 
-    thingspeak.setup_logger()
+    elastic_search.setup_logger()
 
     global sensor
     global last_report_initiated

@@ -15,3 +15,6 @@ def log(pulses, k_w_h, verbose=False):
         logger.debug("indexing:".format(data))
 
     es.index(index="electricity", doc_type="zapdos", body=data, timestamp=timestamp)
+
+def setup_logger():
+    logging.getLogger(__name__).setLevel(logging.DEBUG)
