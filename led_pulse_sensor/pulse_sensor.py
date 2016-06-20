@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 import logging
-import reporting.thingspeak as thingspeak
+import reporting.elastic_search as elastic_search
 from datetime import datetime
 import threading
 import RPi.GPIO as GPIO
@@ -42,9 +42,9 @@ def read_lux():
     return lux
 
 
-def report(data):
-    logger.info("reporting pulses = {}".format(data))
-    thingspeak.log(data, True)
+def report(pulses, kwh):
+    logger.debug("logging pulses={} kwh={}".format(pulses, kwh))
+    elastic_search.log(pulses, kwh)
 
 
 def handle_control_led(light_level):
@@ -59,14 +59,10 @@ def report_async():
     global pulses
     logger.debug("Reporting at {}. Last report was {}".format(datetime.now(), last_report_initiated))
     k_w_h = pulses * MULTIPLIER_K_W_H
-    data = {
-        'field3': str(pulses),
-        'field4': str(k_w_h)
-    }
+    thr = threading.Thread(target=report, args=(pulses, k_w_h,), kwargs={})
+    thr.start()
     pulses = 0
     last_report_initiated = datetime.now()
-    thr = threading.Thread(target=report, args=(data,), kwargs={})
-    thr.start()
 
 
 def should_report():
