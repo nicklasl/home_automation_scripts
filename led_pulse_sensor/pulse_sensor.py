@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 import logging
 import reporting.elastic_search as elastic_search
+import reporting.influx as influx
 from datetime import datetime
 import threading
 import RPi.GPIO as GPIO
@@ -44,6 +45,7 @@ def read_lux():
 
 def report(pulses, kwh):
     elastic_search.log(pulses, kwh)
+    influx.log(pulses, kwh)
 
 
 def handle_control_led(light_level):
@@ -88,6 +90,7 @@ def setup():
     logging.getLogger(__name__).setLevel(logging.DEBUG)
 
     elastic_search.setup_logger()
+    influx.setup_logger()
 
     global sensor
     global last_report_initiated
