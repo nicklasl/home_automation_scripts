@@ -8,7 +8,6 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 import logging
-import reporting.elastic_search as elastic_search
 import reporting.influx as influx
 from datetime import datetime
 import threading
@@ -44,7 +43,6 @@ def read_lux():
 
 
 def report(pulses, kwh):
-    elastic_search.log(pulses, kwh)
     influx.log(pulses, kwh)
 
 
@@ -89,7 +87,6 @@ def setup():
     logging.basicConfig(format='%(asctime)s %(message)s', filename='pulse_sensor.log',level=logging.ERROR)
     logging.getLogger(__name__).setLevel(logging.DEBUG)
 
-    elastic_search.setup_logger()
     influx.setup_logger()
 
     global sensor

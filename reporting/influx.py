@@ -1,6 +1,5 @@
 import logging
 import config
-from datetime import datetime
 from influxdb import InfluxDBClient
 
 logger = logging.getLogger(__name__)
@@ -9,24 +8,23 @@ client = InfluxDBClient(INFLUX_URI, 8086, 'root', 'root', 'home')
 
 
 def log(pulses, k_w_h, verbose=False):
-    timestamp = datetime.now()
     json_body = [
         {
             "measurement": "electricity",
             "tags": {
-                'type': "kwh"
+                "type": "kwh"
             },
             "fields": {
-                "value": k_w_h
+                "value": float(k_w_h)
             }
         },
         {
             "measurement": "electricity",
             "tags": {
-                'type': "pulses"
+                "type": "pulses"
             },
             "fields": {
-                "value": pulses
+                "value": float(pulses)
             }
         }
     ]
