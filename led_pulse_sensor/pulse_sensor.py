@@ -42,8 +42,28 @@ def read_lux():
     return lux
 
 
-def report(pulses, kwh):
-    influx.log(pulses, kwh)
+def report(pulses_to_report, kwh_to_report):
+    json_body = [
+        {
+            "measurement": "electricity",
+            "tags": {
+                "type": "kwh"
+            },
+            "fields": {
+                "value": float(kwh_to_report)
+            }
+        },
+        {
+            "measurement": "electricity",
+            "tags": {
+                "type": "pulses"
+            },
+            "fields": {
+                "value": float(pulses_to_report)
+            }
+        }
+    ]
+    influx.log(json_body, True)
 
 
 def handle_control_led(light_level):

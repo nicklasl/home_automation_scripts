@@ -7,31 +7,10 @@ INFLUX_URI = config.key("INFLUX_URI")
 client = InfluxDBClient(INFLUX_URI, 8086, 'root', 'root', 'home')
 
 
-def log(pulses, k_w_h, verbose=False):
-    json_body = [
-        {
-            "measurement": "electricity",
-            "tags": {
-                "type": "kwh"
-            },
-            "fields": {
-                "value": float(k_w_h)
-            }
-        },
-        {
-            "measurement": "electricity",
-            "tags": {
-                "type": "pulses"
-            },
-            "fields": {
-                "value": float(pulses)
-            }
-        }
-    ]
+def log(json, verbose=False):
     if verbose:
-        logger.debug("writing:{}".format(json_body))
-
-    client.write_points(json_body)
+        logger.debug("writing:{}".format(json))
+    client.write_points(json)
 
 
 def setup_logger():
