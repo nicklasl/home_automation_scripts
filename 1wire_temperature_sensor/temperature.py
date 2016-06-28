@@ -1,5 +1,4 @@
 import argparse
-import glob
 import os
 import sys
 import time
@@ -35,8 +34,7 @@ def read_temp(device_file):
 
 
 def read_temp_for_folder(sensor):
-    device_folder = glob.glob(base_dir + sensor)
-    device_file = device_folder + '/w1_slave'
+    device_file = base_dir + '/' + sensor + '/w1_slave'
     return read_temp(device_file)
 
 
