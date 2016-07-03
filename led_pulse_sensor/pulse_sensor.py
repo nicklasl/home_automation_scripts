@@ -14,7 +14,7 @@ import threading
 import RPi.GPIO as GPIO
 from Adafruit_TSL2561 import Adafruit_TSL2561
 
-LUX_THRESHOLD = 5
+LUX_THRESHOLD = 1
 HIGH = "HIGH"
 LOW = "LOW"
 REPORT_PERIOD_SECONDS = 5 * 60
