@@ -63,7 +63,7 @@ def report(pulses_to_report, kwh_to_report):
             }
         }
     ]
-    influx.log(json_body, True)
+    influx.log(json_body)
 
 
 def handle_control_led(light_level):
@@ -76,7 +76,6 @@ def handle_control_led(light_level):
 def report_async():
     global last_report_initiated
     global pulses
-    logger.debug("Reporting at {}. Last report was {}".format(datetime.now(), last_report_initiated))
     k_w_h = pulses * MULTIPLIER_K_W_H
     thr = threading.Thread(target=report, args=(pulses, k_w_h,), kwargs={})
     thr.start()
@@ -96,7 +95,6 @@ def loop():
         handle_control_led(current_light_level)
         if previous_light_level == HIGH and current_light_level == LOW:
             pulses += 1
-            #logger.debug("registering pulse. ({})".format(pulses))
         if should_report():
             report_async()
 
