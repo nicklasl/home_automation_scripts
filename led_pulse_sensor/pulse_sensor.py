@@ -63,7 +63,7 @@ def report(pulses_to_report, kwh_to_report):
             }
         }
     ]
-    influx.log(json_body, True)
+    influx.log(json_body)
 
 
 def handle_control_led(light_level):
