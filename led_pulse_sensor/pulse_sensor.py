@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 import logging
 import reporting.influx as influx
+import reporting.file_write as file_write_reporter
 from datetime import datetime
 import threading
 import RPi.GPIO as GPIO
@@ -63,6 +64,7 @@ def report(pulses_to_report, kwh_to_report):
             }
         }
     ]
+    file_write_reporter.log(json_body)
     influx.log(json_body)
 
 
