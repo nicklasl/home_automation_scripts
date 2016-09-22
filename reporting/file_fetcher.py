@@ -13,7 +13,6 @@ LOCAL_FOLDER = "./measurements/"
 parser = argparse.ArgumentParser(description='Fetch file to report.')
 parser.add_argument("server", type=str, help='the server to fetch from')
 parser.add_argument("user", type=str, help='the user name')
-parser.add_argument("password", type=str, help='the password')
 args = parser.parse_args()
 
 if not os.path.isdir(LOCAL_FOLDER):
