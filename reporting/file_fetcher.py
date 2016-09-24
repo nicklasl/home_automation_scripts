@@ -7,7 +7,7 @@ except ImportError: import json
 
 
 FILE_NAME_SUFFIX = ".measurement"
-FOLDER = "/home/pi/dev/home_automation/led_pulse_sensor/measurements/"
+FOLDER = "/tmp/measurements/"
 LOCAL_FOLDER = "./measurements/"
 
 parser = argparse.ArgumentParser(description='Fetch file to report.')

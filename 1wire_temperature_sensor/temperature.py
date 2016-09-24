@@ -6,6 +6,7 @@ import time
 # Path hack.
 sys.path.insert(0, os.path.abspath('..'))
 
+import reporting.file_write as file_write_reporter
 import reporting.influx as influx
 
 os.system('modprobe w1-gpio')
@@ -50,6 +51,7 @@ def report_temperature(current_temperature, report):
             }
         }
     ]
+    file_write_reporter.log(json_body)
     influx.log(json_body, True)
 
 

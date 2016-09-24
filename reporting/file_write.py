@@ -5,7 +5,7 @@ import os
 
 logger = logging.getLogger(__name__)
 FILE_NAME_SUFFIX = ".measurement"
-FOLDER = "measurements"
+FOLDER = "/tmp/measurements"
 
 def write_append(file_name, json):
     with open(file_name, "a+") as myfile:
