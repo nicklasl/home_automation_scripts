@@ -4,28 +4,23 @@ import time
 import sys
 from requests import exceptions
 import influxdb
-from queuelib import FifoDiskQueue
 
 logger = logging.getLogger(__name__)
-INFLUX_URI = config.key("INFLUX_URI")
-client = influxdb.InfluxDBClient(INFLUX_URI, 8086, 'root', 'root', 'home')
-q = FifoDiskQueue("queuefile")
 
 
-def append_to_retry_queue(json):
-    q.push(str(json))
+def setup_influx_client():
+    global client
+    INFLUX_URI = config.key("INFLUX_URI")
+    INFLUX_USERNAME = config.key("INFLUX_USERNAME")
+    INFLUX_PASSWORD = config.key("INFLUX_PASSWORD")
+    INFLUX_DATABASE = config.key("INFLUX_DATABASE")
+    client = influxdb.InfluxDBClient(INFLUX_URI, 8086, INFLUX_USERNAME, INFLUX_PASSWORD, INFLUX_DATABASE)
 
 
-def write_retry_queue():
-    while q:
-        queued_json = eval(q.pop())
-        log(queued_json, verbose=True, retry = False)
-        time.sleep(1)
+setup_influx_client()
 
 
 def log(json, verbose=False, retry = True):
-    if retry:
-        write_retry_queue()
 
     append_time(json)
     if verbose:
@@ -44,8 +39,7 @@ def log(json, verbose=False, retry = True):
 
 
 def handle_error(e, json):
-    logger.error("there was an error: {}".format(e))
-    append_to_retry_queue(json)
+    logger.error("there was an error: {}\nwhile trying to log: {}".format(e, json))
 
 
 def append_time(json):
@@ -56,5 +50,8 @@ def append_time(json):
 
 
 def setup_logger():
+    global logger
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(format='%(asctime)s %(message)s', filename='influx.log', level=logging.INFO)
     logging.getLogger(__name__).setLevel(logging.DEBUG)
 
