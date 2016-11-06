@@ -38,7 +38,7 @@ def send_warning_email(watts_last_15m):
     server.login(config.key('GMAIL_LOGIN'), config.key('GMAIL_APP_PASSWORD'))
 
     sender = config.key('GMAIL_FROM_ADDRESS')
-    msg = MIMEText("""more than {} w per hour. Consumed last 15 min: {}""".format(LIMIT * 4, watts_last_15m))
+    msg = MIMEText("""Huset drog {} W senaste 15 minutrarna. Gränsen är {} W""".format(watts_last_15m, LIMIT))
     recipients = [config.key('GMAIL_TO_ADDRESS1'), config.key('GMAIL_TO_ADDRESS2')]
     msg['Subject'] = "Kolla värmepumpen"
     msg['From'] = sender
@@ -54,7 +54,7 @@ def main():
     watts_last_15m = dict[u'series'][0][u'values'][0][1]
     print watts_last_15m
     if watts_last_15m > LIMIT:
-        logger.warn("Consumed {} W last 15 minutes. Limit is {}".format(watts_last_15m, LIMIT))
+        logger.warn("Huset drog {} W senaste 15 minutrarna. Gränsen är {} W".format(watts_last_15m, LIMIT))
         send_warning_email(watts_last_15m)
     else:
         logger.debug("Consumed last 15 min: {} W".format(watts_last_15m))
