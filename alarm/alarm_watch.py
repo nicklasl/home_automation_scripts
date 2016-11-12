@@ -1,18 +1,19 @@
 #!/usr/bin/python
 # coding=utf-8
 import os
-import smtplib
 import sys
-from email.mime.text import MIMEText
-
 # Path hack.
 sys.path.insert(0, os.path.abspath('..'))
 
+import smtplib
+from email.mime.text import MIMEText
 import influxdb
 import config
 import logging
+from subprocess import call
 
-LIMIT = 1600
+LIMIT = 1500
+PUSH_NOTIFICATION_FILE_NAME = "send_push.sh"
 
 
 def setup_logging():
@@ -31,14 +32,14 @@ def setup_influx_client():
     client = influxdb.InfluxDBClient(INFLUX_URI, 8086, INFLUX_USERNAME, INFLUX_PASSWORD, INFLUX_DATABASE)
 
 
-def send_warning_email(watts_last_15m):
+def send_warning_email(message):
     server = smtplib.SMTP('smtp.gmail.com:587')
     server.ehlo()
     server.starttls()
     server.login(config.key('GMAIL_LOGIN'), config.key('GMAIL_APP_PASSWORD'))
 
     sender = config.key('GMAIL_FROM_ADDRESS')
-    msg = MIMEText("""Huset drog {} W senaste 15 minutrarna. Gränsen är {} W""".format(watts_last_15m, LIMIT))
+    msg = MIMEText("""{}""".format(message))
     recipients = [config.key('GMAIL_TO_ADDRESS1'), config.key('GMAIL_TO_ADDRESS2')]
     msg['Subject'] = "Kolla värmepumpen"
     msg['From'] = sender
@@ -54,8 +55,11 @@ def main():
     watts_last_15m = dict[u'series'][0][u'values'][0][1]
     print watts_last_15m
     if watts_last_15m > LIMIT:
-        logger.warn("Huset drog {} W senaste 15 minutrarna. Gränsen är {} W".format(watts_last_15m, LIMIT))
-        send_warning_email(watts_last_15m)
+        message = "Huset drog {} W senaste 15 minutrarna. Gränsen är {} W".format(watts_last_15m, LIMIT)
+        logger.warn(message)
+        send_warning_email(message)
+        if os.path.isfile(PUSH_NOTIFICATION_FILE_NAME):
+            call(['bash', PUSH_NOTIFICATION_FILE_NAME, message])
     else:
         logger.debug("Consumed last 15 min: {} W".format(watts_last_15m))
 
