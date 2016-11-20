@@ -13,7 +13,7 @@ import logging
 from subprocess import call
 
 LIMIT = 1500
-PUSH_NOTIFICATION_FILE_NAME = "send_push.sh"
+PUSH_NOTIFICATION_FILE_NAME = "../send_push.sh"
 
 
 def setup_logging():
@@ -59,7 +59,7 @@ def main():
         logger.warn(message)
         send_warning_email(message)
         if os.path.isfile(PUSH_NOTIFICATION_FILE_NAME):
-            call(['bash', PUSH_NOTIFICATION_FILE_NAME, message])
+            call(['bash', PUSH_NOTIFICATION_FILE_NAME, "Värmepumpen", message])
     else:
         logger.debug("Consumed last 15 min: {} W".format(watts_last_15m))
 
