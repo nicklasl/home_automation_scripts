@@ -30,14 +30,23 @@ TYPES = {const.TELLSTICK_CONTROLLER_TELLSTICK: 'tellstick',
          const.TELLSTICK_CONTROLLER_TELLSTICK_DUO: "tellstick duo",
          const.TELLSTICK_CONTROLLER_TELLSTICK_NET: "tellstick net"}
 
-def device_event(id_, method, data, cid, event_tuple):
+
+def try_event_callback(callback_type, *args):
+    for callback in my_events:
+        if callback[0] == callback_type:
+            id_ = args[0]
+            method_string = args[1]
+            callback[1](id_, method_string)
+    pass
+
+
+def device_event(id_, method, data, cid):
     method_string = METHODS.get(method, "UNKNOWN METHOD {0}".format(method))
     string = "[DEVICE] {0} -> {1}".format(id_, method_string)
     if method == const.TELLSTICK_DIM:
         string += " [{0}]".format(data)
     print(string)
-    if event_tuple[1] == id_: #&& method_string == 'turn on'
-        event_tuple[2]()
+    try_event_callback("device", id_, method_string)
 
 
 def device_change_event(id_, event, type_, cid):
@@ -74,12 +83,12 @@ def controller_event(id_, event, type_, new_value, cid):
 
 def add_events(events):
     for event in events:
+        my_events.append(event)
         event_type = event[0]
         if event_type == 'device':
             callbacks.append(core.register_device_event(device_event))
         elif event_type == 'change':
-            callbacks.append(
-                core.register_device_change_event(device_change_event))
+            callbacks.append(core.register_device_change_event(device_change_event))
         elif event_type == 'raw':
             callbacks.append(core.register_raw_device_event(raw_event))
         elif event_type == 'sensor':
@@ -88,19 +97,6 @@ def add_events(events):
             callbacks.append(core.register_controller_event(controller_event))
         else:
             assert event_type == 'all'
-
-
-
-try:
-    import asyncio
-    loop = asyncio.get_event_loop()
-    dispatcher = td.AsyncioCallbackDispatcher(loop)
-except ImportError:
-    loop = None
-    dispatcher = td.QueuedCallbackDispatcher()
-
-core = td.TelldusCore(callback_dispatcher=dispatcher)
-callbacks = []
 
 
 def start():
@@ -114,3 +110,16 @@ def start():
                 time.sleep(0.5)
     except KeyboardInterrupt:
         pass
+
+
+try:
+    import asyncio
+    loop = asyncio.get_event_loop()
+    dispatcher = td.AsyncioCallbackDispatcher(loop)
+except ImportError:
+    loop = None
+    dispatcher = td.QueuedCallbackDispatcher()
+
+core = td.TelldusCore(callback_dispatcher=dispatcher)
+callbacks = []
+my_events = []

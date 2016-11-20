@@ -12,6 +12,7 @@ import tellcore_loop
 
 PUSH_NOTIFICATION_FILE_NAME = "../send_push.sh"
 
+
 def setup_logging():
     global logger
     logger = logging.getLogger(__name__)
@@ -24,13 +25,15 @@ def send_push(title, text):
         call(['bash', PUSH_NOTIFICATION_FILE_NAME, title, text])
 
 
-def my_func():
+def my_func(device_id, method_string):
     logger.debug("my_func executing")
+    logger.debug("device_id={} & method_string={}".format(device_id, method_string))
     print "this is my func executing"
+    print("device_id={} & method_string={}".format(device_id, method_string))
 
 
 def main():
-    door = ("device", "1", my_func)
+    door = ("device", my_func)
     tellcore_loop.add_events([door])
     tellcore_loop.start()
 
