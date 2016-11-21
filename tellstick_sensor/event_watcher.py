@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath('..'))
 from subprocess import call
 import logging
 import tellcore_loop
+from tellcore.telldus import TelldusCore
 
 
 PUSH_NOTIFICATION_FILE_NAME = "../send_push.sh"
@@ -26,6 +27,8 @@ def send_push(title, text):
 
 
 def my_func(device_id, method_string):
+    result = filter(lambda device: device.id == device_id, core.devices())
+    print "result={}".format(result)
     logger.debug("my_func executing")
     logger.debug("device_id={} & method_string={}".format(device_id, method_string))
     print "this is my func executing"
@@ -33,10 +36,10 @@ def my_func(device_id, method_string):
 
 
 def main():
-    door = ("device", my_func)
-    tellcore_loop.add_events([door])
+    device_door = ("device", my_func)
+    tellcore_loop.add_events([device_door])
     tellcore_loop.start()
 
-
+core = TelldusCore()
 setup_logging()
 main()

@@ -32,11 +32,11 @@ TYPES = {const.TELLSTICK_CONTROLLER_TELLSTICK: 'tellstick',
 
 
 def try_event_callback(callback_type, *args):
-    for callback in my_events:
-        if callback[0] == callback_type:
+    for event_callback in my_events:
+        if event_callback[0] == callback_type:
             id_ = args[0]
             method_string = args[1]
-            callback[1](id_, method_string)
+            event_callback[1](id_, method_string)
     pass
 
 
