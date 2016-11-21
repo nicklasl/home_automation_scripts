@@ -27,12 +27,13 @@ def send_push(title, text):
 
 
 def my_func(device_id, method_string):
-    result = filter(lambda device: device.id == device_id, core.devices())
-    print "result={}".format(result)
-    logger.debug("my_func executing")
-    logger.debug("device_id={} & method_string={}".format(device_id, method_string))
-    print "this is my func executing"
-    print("device_id={} & method_string={}".format(device_id, method_string))
+    device = get_device_from_id(device_id)
+    if device.name is "Back door" and method_string is "turn on":
+       send_push("Pling plong!", "Dörren till glasrummet öppnades.")
+
+
+def get_device_from_id(id):
+    return iter(filter(lambda device: device.id == id, core.devices())).next()
 
 
 def main():
