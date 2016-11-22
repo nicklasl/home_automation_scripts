@@ -10,6 +10,7 @@ https://github.com/seanbechhofer/raspberrypi
 
 https://github.com/IainColledge/Adafruit-Raspberry-Pi-Python-Code
 
+https://github.com/erijo/tellcore-py
 
 and also...
 
