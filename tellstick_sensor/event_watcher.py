@@ -22,13 +22,14 @@ def setup_logging():
 
 
 def send_push(title, text):
-    if os.path.isfile(PUSH_NOTIFICATION_FILE_NAME):
+    isfile = os.path.isfile(PUSH_NOTIFICATION_FILE_NAME)
+    if isfile:
         call(['bash', PUSH_NOTIFICATION_FILE_NAME, title, text])
 
 
-def my_func(device_id, method_string):
+def device_callback(device_id, method_string):
     device = get_device_from_id(device_id)
-    if device.name is "Back door" and method_string is "turn on":
+    if device.name.strip() == "Back door" and method_string.strip() == "turn on":
        send_push("Pling plong!", "Dörren till glasrummet öppnades.")
 
 
@@ -37,8 +38,8 @@ def get_device_from_id(id):
 
 
 def main():
-    device_door = ("device", my_func)
-    tellcore_loop.add_events([device_door])
+    device_event = ("device", device_callback)
+    tellcore_loop.add_events([device_event])
     tellcore_loop.start()
 
 core = TelldusCore()
