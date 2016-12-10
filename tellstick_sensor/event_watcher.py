@@ -31,6 +31,9 @@ def device_callback(device_id, method_string):
     device = get_device_from_id(device_id)
     if device.name.strip() == "Back door" and method_string.strip() == "turn on":
        send_push("Pling plong!", "Dörren till glasrummet öppnades.")
+    if device.name.strip() == "Elviras rum" and method_string.strip() == "turn on":
+        send_push("Pling plong!", "Elviras dörr öppnades..")
+
 
 
 def get_device_from_id(id):
