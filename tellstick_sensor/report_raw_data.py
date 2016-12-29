@@ -1,4 +1,3 @@
-
 import os
 import sys
 
@@ -15,10 +14,11 @@ import reporting.influx as influx
 # humidity:34; 5
 # temp:20.2; 6
 args = sys.argv[1].split(";") #arg0 is the file.py
-_type = args[4].split(":")[1]
-_id = args[3].split(":")[1]
-temperature = args[6].split(":")[1]
-humidity = args[5].split(":")[1]
+print "args={}".format(args)
+_type = args[3].split(":")[1]
+_id = args[2].split(":")[1]
+temperature = args[5].split(":")[1]
+humidity = args[4].split(":")[1]
 
 print "type={},id={},temperature={},humidity={}".format(_type, _id, temperature, humidity)
 
@@ -27,6 +27,9 @@ sensor_name = "not_set"
 if _type == 'temperaturehumidity' and _id == '135':
     print "temperature:{}, humidity:{}".format(temperature, humidity)
     sensor_name = "inside_1_floor_hallway"
+if _type == 'temperaturehumidity' and _id == '167':
+    print "temperature:{}, humidity:{}".format(temperature, humidity)
+    sensor_name = "inside_basement_storage"
 
 json_body = [
     {
@@ -49,4 +52,5 @@ json_body = [
     }
 ]
 
-influx.log(json_body, True)
+if sensor_name != "not_set":
+    influx.log(json_body, True)
