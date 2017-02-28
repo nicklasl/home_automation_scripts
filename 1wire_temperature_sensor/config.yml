@@ -1,0 +1,20 @@
+mqtt:
+  host: hab
+  port: 1883
+
+sensors:
+  - id: 28-000006ae9722
+    name: outside_north_east
+  - id: 28-000006ad2d5e
+    name: outside_south_west
+  - id: 28-000006add796
+    name: inside_basement
+  - id: 28-0516944f79ff
+    name: inside_basement_relax
+  - id: 28-000006ad65a8
+    name: inside_kitchen
+  - id: 28-04169492b8ff
+    name: inside_basement_food_storage
+  - id: 28-03168c8490ff
+    name: inside_1_floor_nursery
+
