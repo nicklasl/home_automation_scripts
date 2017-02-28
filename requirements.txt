@@ -1,0 +1,5 @@
+paho-mqtt==1.2
+PyYAML==3.12
+influxdb==3.0.0
+requests==2.11.1
+tellcore_py==1.1.2
