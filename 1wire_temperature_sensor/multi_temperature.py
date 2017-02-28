@@ -55,7 +55,7 @@ def loop_sensors():
     for sensor in cfg['sensors']:
         id = sensor['id']
         try:
-            temperature = float(read_temp_for_folder(id))
+            temperature = read_temp_for_folder(id)
             mqtt_publish.single(topic=sensor['name'], payload=temperature, qos=0, retain=False,
                             hostname=cfg['mqtt']['host'],
                             port=cfg['mqtt']['port'], client_id="", keepalive=60, will=None, auth=None, tls=None,
