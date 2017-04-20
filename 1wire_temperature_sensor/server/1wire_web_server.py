@@ -18,7 +18,8 @@ def list_sensors():
 
 @app.route("/sensors/<id>")
 def get_temp_for_sensor(id):
-    temperature = sensor_reader.read_temp(BASE_DIR+id)
+    sensor_file = BASE_DIR + id + '/w1_slave'
+    temperature = sensor_reader.read_temp(sensor_file)
     result = {"id": id,
      "temperature": temperature,
      "timestamp": time.time()}
