@@ -32,4 +32,4 @@ if __name__ == "__main__":
         exit(1)
     os.system('modprobe w1-gpio')
     os.system('modprobe w1-therm')
-    app.run()
+    app.run(host='0.0.0.0')
