@@ -12,4 +12,4 @@ while True:
         print("PIR ALARM!")
     if GPIO.input(door_pin):
         print("DOOR ALARM!")
-    time.sleep(5)
+    time.sleep(0.5)
