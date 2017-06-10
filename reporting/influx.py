@@ -21,7 +21,7 @@ setup_influx_client()
 
 
 def log(json, verbose=False, retry = True):
-
+    append_date_time_tags(json)
     append_time(json)
     if verbose:
         logger.debug("writing:{}".format(json))
@@ -40,6 +40,20 @@ def log(json, verbose=False, retry = True):
 
 def handle_error(e, json):
     logger.error("there was an error: {}\nwhile trying to log: {}".format(e, json))
+
+
+def append_date_time_tags(json):
+    import datetime
+    d = datetime.date.today()
+    mm = '{0:02d}'.format(d.month)
+    yyyy = '{0:4d}'.format(d.year)
+
+    for dicts in json:
+        for key, value in dicts.iteritems():
+            if key == "tags":
+                value['yyyy'] = yyyy
+                value['mm'] = mm
+                value['yyyymm'] = yyyy + mm
 
 
 def append_time(json):

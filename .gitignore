@@ -92,4 +92,4 @@ ENV/
 .DS_Store
 ._.DS_Store
 .idea/
-home_automation.iml
+*.iml
