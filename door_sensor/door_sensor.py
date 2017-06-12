@@ -24,7 +24,8 @@ def setup():
     global url
     host = cfg['api']['host']
     port = cfg['api']['port']
-    url = 'http://{}:{}'.format(host, port)
+    url = 'http://{}:{}/doorsensor'.format(host, port)
+    print "url={}".format(url)
     GPIO.setup(basement_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(garage_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
