@@ -57,7 +57,7 @@ def loop():
 
         last_garage_door_state = door_open(garage_door_pin)
         last_basement_door_state = door_open(basement_door_pin)
-        time.sleep(2)
+        time.sleep(cfg['sleep_time'])
 
 
 def door_open(pin):

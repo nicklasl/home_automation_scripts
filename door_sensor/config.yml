@@ -5,3 +5,5 @@ api:
 door:
   23: garage_door
   24: basement_door
+
+sleep_time: 2 #sleep time in seconds.
