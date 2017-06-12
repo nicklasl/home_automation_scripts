@@ -10,6 +10,7 @@ basement_door_pin = 24
 # 23 = Green
 garage_door_pin = 23
 
+debug=True
 
 def load_cfg():
     global cfg
@@ -25,7 +26,7 @@ def setup():
     host = cfg['api']['host']
     port = cfg['api']['port']
     url = 'http://{}:{}/doorsensor'.format(host, port)
-    print "url={}".format(url)
+    if debug: print "url={}".format(url)
     GPIO.setup(basement_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(garage_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -36,9 +37,11 @@ def report(pin, state):
     else:
         state_text = "closed"
     try:
-        r = requests.post(url, data={'door': cfg['door'][pin], 'state': state_text})
+        blob = {'door': cfg['door'][pin], 'state': state_text}
+        if debug: print "sending to server: {}".format(blob)
+        r = requests.post(url, data=blob)
     except IOError as e:
-        print "error is {}".format(e)
+        if debug: print "error is {}".format(e)
     pass
 
 
@@ -47,10 +50,10 @@ def loop():
     while True:
         if door_open(basement_door_pin) != last_basement_door_state:
             report(basement_door_pin, door_open(basement_door_pin))
-            print("BASEMENT DOOR OPEN!")
+            if debug: print("Basement door state changed.")
         if door_open(garage_door_pin) != last_garage_door_state:
             report(garage_door_pin, door_open(garage_door_pin))
-            print("GARAGE DOOR OPEN!")
+            if debug: print("Garage door state changed.")
 
         last_garage_door_state = door_open(garage_door_pin)
         last_basement_door_state = door_open(basement_door_pin)
