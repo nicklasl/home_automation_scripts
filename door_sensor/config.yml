@@ -1,6 +1,6 @@
 api:
   host: hab
-  port: 1883
+  port: 1880
 
 door:
   23: garage_door
