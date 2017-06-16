@@ -16,9 +16,9 @@ basement = Button(garage_door_pin)
 def get_state():
     return json.dumps([
         {'door': cfg['door'][basement_door_pin],
-         'state': basement.is_pressed},
+         'open': not basement.is_pressed},
         {'door': cfg['door'][garage_door_pin],
-         'state': garage.is_pressed}
+         'open': not garage.is_pressed}
     ])
 
 
