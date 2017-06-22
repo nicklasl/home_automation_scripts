@@ -1,6 +1,7 @@
+import threading
+
 import RPi.GPIO as GPIO
 import requests
-import threading
 import time
 import yaml
 
@@ -56,10 +57,10 @@ def report_async(pin, state):
 def loop():
     global last_garage_door_state, last_basement_door_state
     while True:
-        if door_open(basement_door_pin) != last_basement_door_state:
+        if door_open(basement_door_pin) != last_basement_door_state:  # Only report if state has changed.
             report_async(basement_door_pin, door_open(basement_door_pin))
             if debug: print("Basement door state changed.")
-        if door_open(garage_door_pin) != last_garage_door_state:
+        if door_open(garage_door_pin) != last_garage_door_state:  # Only report if state has changed.
             report_async(garage_door_pin, door_open(garage_door_pin))
             if debug: print("Garage door state changed.")
 
