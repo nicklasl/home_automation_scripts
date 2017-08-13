@@ -9,10 +9,10 @@ app = Flask(__name__)
 
 SENSORS = [
     {'id': "1",
-     'friendlyName': "inside_basement_storage",
+     'friendlyName': "outside_conservatory",
      'gpioPin': 4},
     {'id': "2",
-     'friendlyName': "outside_conservatory",
+     'friendlyName': "inside_basement_storage",
      'gpioPin': 17}]
 
 
