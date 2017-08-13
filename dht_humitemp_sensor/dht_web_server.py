@@ -5,6 +5,10 @@ from flask import Flask, abort
 
 import sensor_reader
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 app = Flask(__name__)
 
 SENSORS = [
