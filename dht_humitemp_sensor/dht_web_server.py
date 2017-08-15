@@ -1,11 +1,11 @@
 import json
+import logging
 
 import time
 from flask import Flask, abort
 
 import sensor_reader
 
-import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -37,6 +37,8 @@ def get_temp_for_sensor(id):
         return abort(404)
 
     temperature, humidity = sensor_reader.read_temp_and_humidity(sensor_to_check["gpioPin"])
+    if (id == 2): #fix value diff
+        temperature += 3
     result = {"id": id,
               "friendlyName": sensor_to_check["friendlyName"],
               "temperature": temperature,
