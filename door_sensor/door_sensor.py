@@ -4,6 +4,8 @@ import RPi.GPIO as GPIO
 import requests
 import time
 import yaml
+import reporting.udp_alive_reporter as udp_reporter
+
 
 GPIO.setmode(GPIO.BCM)
 
@@ -76,6 +78,7 @@ def door_open(pin):
 try:
     load_cfg()
     setup()
+    udp_reporter.start_reporting("door_sensor.py")
     loop()
 # Stop on Ctrl+C and clean up
 except KeyboardInterrupt:
