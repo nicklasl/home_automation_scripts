@@ -1,5 +1,11 @@
-import threading
+import os
+import sys
 
+# Path hack.
+sys.path.insert(0, os.path.abspath('..'))
+
+
+import threading
 import RPi.GPIO as GPIO
 import requests
 import time
