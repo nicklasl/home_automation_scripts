@@ -2,8 +2,8 @@ import socket
 import config
 from threading import Timer
 
-UDP_HOST = (config.key("UDP_REPORTING_HOST"), config.key("UDP_REPORTING_PORT"))
-TIME_BETWEEN_REPORTS = config.key("UDP_SECONDS_BETWEEN_REPORTS")
+UDP_HOST = (config.key("UDP_REPORTING_HOST"), config.int_key("UDP_REPORTING_PORT"))
+TIME_BETWEEN_REPORTS = config.int_key("UDP_SECONDS_BETWEEN_REPORTS")
 
 
 def report_status(message):
