@@ -10,7 +10,7 @@ import RPi.GPIO as GPIO
 import requests
 import time
 import yaml
-import reporting.udp_alive_reporter as udp_reporter
+import reporting.udp_reporter as udp_reporter
 
 
 GPIO.setmode(GPIO.BCM)

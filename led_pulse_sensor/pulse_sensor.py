@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 import logging
 import reporting.influx as influx
+import reporting.udp_reporter as udp_reporter
 from datetime import datetime
 import threading
 import RPi.GPIO as GPIO
@@ -95,6 +96,7 @@ def loop():
         handle_control_led(current_light_level)
         if previous_light_level == HIGH and current_light_level == LOW:
             pulses += 1
+            udp_reporter.send_message("pulse detected")
         if should_report():
             report_async()
 

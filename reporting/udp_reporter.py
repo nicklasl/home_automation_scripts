@@ -6,10 +6,12 @@ UDP_HOST = (config.key("UDP_REPORTING_HOST"), config.int_key("UDP_REPORTING_PORT
 TIME_BETWEEN_REPORTS = config.int_key("UDP_SECONDS_BETWEEN_REPORTS")
 
 
-def report_status(message):
-    sock = socket.socket(socket.AF_INET,  # Internet
-                         socket.SOCK_DGRAM)  # UDP
+def send_message(message):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(message, UDP_HOST)
+
+def report_status(message):
+    send_message(message)
     Timer(TIME_BETWEEN_REPORTS, report_status, args=["{}".format(message)]).start()
 
 
