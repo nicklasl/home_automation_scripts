@@ -24,5 +24,6 @@ try:
 
     # Subscribe to motion events. This method blocks until the event stream is closed. (You can close the event stream in the callback if you no longer want to listen for events.)
     arlo.SubscribeToMotionEvents(basestations[0], callback)
+    print("Waiting for motion events...")
 except Exception as e:
     print(e)
