@@ -1,7 +1,7 @@
 import datetime
 import json
 from datetime import timedelta, date
-
+import threading
 from flask import Flask
 from flask import request
 
@@ -22,16 +22,26 @@ def hello():
     return "Hello World!"
 
 
-@app.route("/arm", methods=['POST'])
 def arm():
     result = arlo.Arm(basestation)
-    return json.dumps(result)
+    print("result for /arm = {}".format(result))
+
+
+@app.route("/arm", methods=['POST'])
+def arm_request():
+    threading.Thread(target=arm, args=(), kwargs={}).start()
+    return "ok"
+
+
+def disarm():
+    result = arlo.Disarm(basestation)
+    print("result for /disarm = {}".format(result))
 
 
 @app.route("/disarm", methods=['POST'])
-def disarm():
-    result = arlo.Disarm(basestation)
-    return json.dumps(result)
+def disarm_request():
+    threading.Thread(target=disarm, args=(), kwargs={}).start()
+    return "ok"
 
 
 @app.route("/camera")
@@ -96,7 +106,7 @@ def download_videos_last_24h():
         result = arlo.BatchDeleteRecordings(library)
         print('Batch deletion of videos completed successfully.')
 
-    pass
+    return "ok"
 
 
 if __name__ == "__main__":
