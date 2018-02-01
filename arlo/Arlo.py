@@ -38,11 +38,17 @@ else:
 #logging.basicConfig(level=logging.DEBUG,format='[%(levelname)s] (%(threadName)-10s) %(message)s',)
 
 class EventStream(object):
-    def __init__(self, method, args):
+    def __init__(self, event_handler, heartbeat_handler, args):
+        self.started = False
         self.connected = False
         self.registered = False
         self.queue = queue.Queue()
-        self.thread = threading.Thread(name="EventStream", target=method, args=(args))
+        self.heartbeat_stop_event = threading.Event()
+        self.arlo = args[0]
+        self.heartbeat_handler = heartbeat_handler
+
+        event_stream = sseclient.SSEClient('https://arlo.netgear.com/hmsweb/client/subscribe?token='+self.arlo.request.session.headers.get('Authorization'), session=self.arlo.request.session)
+        self.thread = threading.Thread(name="EventStream", target=event_handler, args=(args[0], event_stream, ))
         self.thread.setDaemon(True)
 
     def Get(self, block=True, timeout=None):
@@ -71,6 +77,8 @@ class EventStream(object):
 
     def Start(self):
         self.thread.start()
+        self.started = True
+        return self
 
     def Connect(self):
         self.connected = True
@@ -82,9 +90,13 @@ class EventStream(object):
             self.queue.put(None)
 
     def Register(self):
+        heartbeat_thread = threading.Thread(name='HeartbeatThread', target=self.heartbeat_handler, args=(self.arlo, self.heartbeat_stop_event, ))
+        heartbeat_thread.setDaemon(True)
+        heartbeat_thread.start()
         self.registered = True
 
     def Unregister(self):
+        self.heartbeat_stop_event.set()
         self.registered = False
 
 class Request(object):
@@ -123,7 +135,13 @@ class Request(object):
 class Arlo(object):
     TRANSID_PREFIX = 'web'
     def __init__(self, username, password):
-        signal.signal(signal.SIGINT, self.interrupt_handler)
+
+        # signals only work in main thread
+        try:
+            signal.signal(signal.SIGINT, self.interrupt_handler)
+        except:
+            pass
+
         self.event_streams = {}
         self.request = None
 
@@ -131,8 +149,6 @@ class Arlo(object):
 
     def interrupt_handler(self, signum, frame):
         print("Caught Ctrl-C, exiting.")
-        #for basestation_id in self.event_streams:
-        #    self.event_streams[basestation_id].Disconnect()
         os._exit(1)
 
     def genTransId(self, trans_type=TRANSID_PREFIX):
@@ -199,7 +215,7 @@ class Arlo(object):
             'DNT':'1',
             'Host': 'arlo.netgear.com',
             'Referer': 'https://arlo.netgear.com/',
-	    #'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1_2 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Mobile/15B202 NETGEAR/v1 (iOS Vuezone)',
             'Authorization': body['token']
         }
         self.request.session.headers.update(headers)
@@ -225,7 +241,6 @@ class Arlo(object):
     #
     # You generally shouldn't need to call Subscribe() directly, although I'm leaving it "public" for now.
     ##
-
     def Subscribe(self, basestation):
         basestation_id = basestation.get('deviceId')
 
@@ -248,13 +263,19 @@ class Arlo(object):
                             self.event_streams[basestation_id].queue.put(response)
                     elif response.get('status') == 'connected':
                         self.event_streams[basestation_id].Connect()
+        
+        def Heartbeat(self, stop_event):
+            while not stop_event.wait(2.0):
+                try:
+                    self.Ping(basestation)
+                except queue.Empty:
+                    pass
 
         if basestation_id not in self.event_streams or not self.event_streams[basestation_id].connected:
-            event_stream = sseclient.SSEClient('https://arlo.netgear.com/hmsweb/client/subscribe?token='+self.request.session.headers.get('Authorization'), session=self.request.session)
-            self.event_streams[basestation_id] = EventStream(QueueEvents, args=(self, event_stream,))
+            self.event_streams[basestation_id] = EventStream(QueueEvents, Heartbeat, args=(self, ))
             self.event_streams[basestation_id].Start()
             while not self.event_streams[basestation_id].connected:
-                time.sleep(1)
+                time.sleep(0.5)
 
         if not self.event_streams[basestation_id].registered:
             Register(self)
@@ -264,9 +285,12 @@ class Arlo(object):
     ##
     def Unsubscribe(self, basestation):
         basestation_id = basestation.get('deviceId')
-        if basestation_id in self.event_streams and self.event_streams[basestation_id].connected:
-            self.request.get('https://arlo.netgear.com/hmsweb/client/unsubscribe', 'Unsubscribe')
-            self.event_stream[basestation_id].remove()
+        if basestation_id in self.event_streams:
+            if self.event_streams[basestation_id].connected:
+                self.request.get('https://arlo.netgear.com/hmsweb/client/unsubscribe', 'Unsubscribe')
+                self.event_streams[basestation_id].Disconnect()
+
+            self.event_streams[basestation_id].remove()
 
     ##
     # The following are examples of the json you would need to pass in the body of the Notify() call to interact with Arlo:
@@ -331,10 +355,14 @@ class Arlo(object):
 
             return event
 
+    def Ping(self, basestation):
+        basestation_id = basestation.get('deviceId')
+        return self.NotifyAndGetResponse(basestation, {"action":"set","resource":"subscriptions/"+self.user_id+"_web","publishResponse":False,"properties":{"devices":[basestation_id]}})
+
     # Use this method to subscribe to motion events. You must provide a callback function which will get called once per motion event.
     #
     # The callback function should have the following signature:
-    #   def callback(self, basestation_id, xcloud_id, event)
+    #   def callback(self, basestation, event)
     #
     # This is an example of handling a specific event, in reality, you'd probably want to write a callback for HandleEvents()
     # that has a big switch statement in it to handle all the various events Arlo produces.
@@ -358,7 +386,17 @@ class Arlo(object):
             while basestation_id in self.event_streams and self.event_streams[basestation_id].connected:
                 event = self.event_streams[basestation_id].Get(block=True, timeout=timeout)
                 if event:
-                    callback(self, basestation, event)
+                    # If this event has is of resource type "subscriptions", then it's a ping reply event.
+                    # For now, these types of events will be requeued, since they are generated in response to and expected as a reply by the Ping() method.
+                    # HACK: Take a quick nap here to give the Ping() method's thread a chance to get the queued event.
+                    if event.get('resource').startswith('subscriptions'):
+                        self.event_streams[basestation_id].queue.put(event)
+                        time.sleep(0.05)
+                    else:
+                        response = callback(self, basestation, event)
+                        # NOTE: Not ideal, but this allows you to look for a specific event and break if you want to return it.
+                        if response is not None:
+                            return response
 
     def GetBaseStationState(self, basestation):
         return self.NotifyAndGetResponse(basestation, {"action":"get","resource":"basestation","publishResponse":False})
@@ -387,6 +425,23 @@ class Arlo(object):
     def Disarm(self, basestation):
         return self.NotifyAndGetResponse(basestation, {"action":"set","resource":"modes","publishResponse":True,"properties":{"active":"mode0"}})
 
+    # NOTE: Brightness is between -2 and 2 in increments of 1 (-2, -1, 0, 1, 2).
+    # Setting it to an invalid value has no effect.
+    # Returns:
+    #{
+    #   "action": "is",
+    #   "from": "XXXXXXXXXXXXX",
+    #   "properties": {
+    #       "brightness": -2
+    #   },
+    #   "resource": "cameras/XXXXXXXXXXXXX",
+    #   "to": "336-XXXXXXX_web",
+    #   "transId": "web!XXXXXXXX.389518!1514956240683"
+    #}
+    #
+    def AdjustBrightness(self, basestation, camera, brightness=0):
+        return self.NotifyAndGetResponse(basestation, {"action":"set","resource":"cameras/"+camera.get('deviceId'),"publishResponse":True,"properties":{"brightness":brightness}})
+
     # NOTE: The Arlo API seems to disable calendar mode when switching to other modes, if it's enabled.
     # You should probably do the same, although, the UI reflects the switch from calendar mode to say armed mode without explicitly setting calendar mode to inactive.
     def Calendar(self, basestation, active=True):
@@ -398,8 +453,10 @@ class Arlo(object):
     def DeleteMode(self, basestation, mode):
         return self.NotifyAndGetResponse(basestation, {"action":"delete","resource":"modes/"+mode,"publishResponse":True})
 
-    def ToggleCamera(self, basestation, camera_id, active=True):
-        return self.NotifyAndGetResponse(basestation, {"action":"set","resource":"cameras/"+camera_id,"publishResponse":True,"properties":{"privacyActive":active}})
+    # Privacy active = True - Camera is off.
+    # Privacy active = False - Camera is on.
+    def ToggleCamera(self, basestation, camera, active=True):
+        return self.NotifyAndGetResponse(basestation, {"action":"set","resource":"cameras/"+camera.get('deviceId'),"publishResponse":True,"properties":{"privacyActive":active}})
 
     def Reset(self):
         return self.request.get('https://arlo.netgear.com/hmsweb/users/library/reset')
@@ -414,7 +471,7 @@ class Arlo(object):
         return self.request.get('https://arlo.netgear.com/hmsweb/users/profile')
 
     ##
-    # {"userId":"336-4764296","email":"jeffreydwalter@gmail.com","token":"2_5BtvCDVr5K_KJyGKaq8H61hLybT7D69krsmaZeCG0tvs-yw5vm0Y1LKVVoVI9Id19Fk9vFcGFnMja0z_5eNNqP_BOXIX9rzekS2SgTjz7Ao6mPzGs86_yCBPqfaCZCkr0ogErwffuFIZsvh_XGodqkTehzkfQ4Xl8u1h9FhqDR2z","paymentId":"27432411","accountStatus":"registered","serialNumber":"48935B7SA9847","countryCode":"US","tocUpdate":false,"policyUpdate":false,"validEmail":true,"arlo":true,"dateCreated":1463975008658}
+    # {"userId":"XXX-XXXXXXX","email":"jeffreydwalter@gmail.com","token":"2_5BtvCDVr5K_KJyGKaq8H61hLybT7D69krsmaZeCG0tvs-yw5vm0Y1LKVVoVI9Id19Fk9vFcGFnMja0z_5eNNqP_BOXIX9rzekS2SgTjz7Ao6mPzGs86_yCBPqfaCZCkr0ogErwffuFIZsvh_XGodqkTehzkfQ4Xl8u1h9FhqDR2z","paymentId":"XXXXXXXX","accountStatus":"registered","serialNumber":"XXXXXXXXXXXXXX","countryCode":"US","tocUpdate":false,"policyUpdate":false,"validEmail":true,"arlo":true,"dateCreated":1463975008658}
     ##
     def GetSession(self):
         return self.request.get('https://arlo.netgear.com/hmsweb/users/session')
@@ -592,6 +649,8 @@ class Arlo(object):
     ##
     # Returns a generator that is the chunked video stream from the presignedContentUrl.
     #
+    # url: presignedContentUrl
+    #
     # Obviously, this function is generic and could be used to download anything. :)
     ##
     def StreamRecording(self, url, chunk_size=4096):
@@ -602,39 +661,70 @@ class Arlo(object):
 
     ##
     # Writes a video to a given local file path.
+    #
     # url: presignedContentUrl
+    #
     # to: path where the file should be written
     ##
     def DownloadRecording(self, url, to):
-        stream = arlo.StreamRecording(url)
-        with open(to, 'w') as f:
+        stream = self.StreamRecording(url)
+        with open(to, 'wb') as fd:
             for chunk in stream:
-                # Support both Python 2.7 and 3.
-                if sys.version[0] == '2':
-                    f.write(chunk)
-                else:
-                    f.buffer.write(chunk)
-        f.close()
+                fd.write(chunk)
+        fd.close()
+
     ##
-    # This function returns a json object containing the rtmps url to the requested video stream.
-    # You will need the to install a library to handle streaming of this protocol: https://pypi.python.org/pypi/python-librtmp
+    # Writes a snapshot to a given local file path.
     #
+    # url: presignedContentUrl or presignedFullFrameSnapshotUrl
+    #
+    # to: path where the file should be written
+    ##
+    def DownloadSnapshot(self, url, to, chunk_size=4096):
+        r = Request().get(url, stream=True)
+        with open(to, 'wb') as fd:
+            for chunk in r.iter_content(chunk_size):
+                fd.write(chunk)
+        fd.close()
+
+    ##
+    # This function returns the url of the rtsp video stream
+    # This stream needs to be called within 30 seconds or else it becomes invalid
+    # It can be streamed via ffmpeg -re -i 'rtsps://<url>' -acodec copy -vcodec copy test.mp4
     # The request to /users/devices/startStream returns:
-    #{ "url":"rtmps://vzwow09-z2-prod.vz.netgear.com:80/vzmodulelive?egressToken=b1b4b675_ac03_4182_9844_043e02a44f71&userAgent=web&cameraId=48B4597VD8FF5_1473010750131" }
+    #{ "url":"rtsp://<url>:443/vzmodulelive?egressToken=b<xx>&userAgent=iOS&cameraId=<camid>" }
     #
     ##
     def StartStream(self, camera):
-        return self.request.post('https://arlo.netgear.com/hmsweb/users/devices/startStream', {"to":camera.get('parentId'),"from":self.user_id+"_web","resource":"cameras/"+camera.get('deviceId'),"action":"set","publishResponse":True,"transId":self.genTransId(),"properties":{"activityState":"startUserStream","cameraId":camera.get('deviceId')}}, headers={"xcloudId":camera.get('xCloudId')})
+        stream_url_dict = self.request.post('https://arlo.netgear.com/hmsweb/users/devices/startStream', {"to":camera.get('parentId'),"from":self.user_id+"_web","resource":"cameras/"+camera.get('deviceId'),"action":"set","publishResponse":True,"transId":self.genTransId(),"properties":{"activityState":"startUserStream","cameraId":camera.get('deviceId')}}, headers={"xcloudId":camera.get('xCloudId')})
+        return stream_url_dict['url'].replace("rtsp://", "rtsps://")
 
     ##
     # This function causes the camera to record a snapshot.
     #
-    # You can get the timezone from GetDevices().
+    # Use DownloadSnapshot() to download the actual image file.
     ##
     def TakeSnapshot(self, camera):
         stream_url = self.StartStream(camera)
         self.request.post('https://arlo.netgear.com/hmsweb/users/devices/takeSnapshot', {'xcloudId':camera.get('xCloudId'),'parentId':camera.get('parentId'),'deviceId':camera.get('deviceId'),'olsonTimeZone':camera.get('properties', {}).get('olsonTimeZone')}, headers={"xcloudId":camera.get('xCloudId')})
         return stream_url;
+
+    ##
+    # This function causes the camera to record a fullframe snapshot.
+    #
+    # The presignedFullFrameSnapshotUrl url is returned.
+    #
+    # Use DownloadSnapshot() to download the actual image file.
+    ##
+    def TriggerFullFrameSnapshot(self, basestation, camera):
+        def callback(self, basestation, event):
+            if event.get("from") == basestation.get("deviceId") and event.get("resource") == "cameras/"+camera.get("deviceId") and event.get("action") == "fullFrameSnapshotAvailable":
+                return event.get("properties", {}).get("presignedFullFrameSnapshotUrl")
+            return None
+
+        self.request.post("https://arlo.netgear.com/hmsweb/users/devices/fullFrameSnapshot", {"to":camera.get("parentId"),"from":self.user_id+"_web","resource":"cameras/"+camera.get("deviceId"),"action":"set","publishResponse":True,"transId":self.genTransId(),"properties":{"activityState":"fullFrameSnapshot"}}, headers={"xcloudId":camera.get("xCloudId")})
+
+        return self.HandleEvents(basestation, callback)
 
     ##
     # This function causes the camera to start recording.
