@@ -1,6 +1,6 @@
 import Adafruit_DHT
 
-sensor_type = Adafruit_DHT.DHT11
+sensor_type = Adafruit_DHT.DHT22
 
 
 def read_temp_and_humidity(gpio):
