@@ -37,8 +37,6 @@ def get_temp_for_sensor(id):
         return abort(404)
 
     temperature, humidity = sensor_reader.read_temp_and_humidity(sensor_to_check["gpioPin"])
-    if id == "2": #fix value diff
-        temperature += 2
     result = {"id": id,
               "friendlyName": sensor_to_check["friendlyName"],
               "temperature": temperature,
