@@ -22,26 +22,16 @@ def hello():
     return "Hello World!"
 
 
-def arm():
-    result = arlo.Arm(basestation)
-    print("result for /arm = {}".format(result))
-
-
 @app.route("/arm", methods=['POST'])
 def arm_request():
-    threading.Thread(target=arm, args=(), kwargs={}).start()
-    return "ok"
-
-
-def disarm():
-    result = arlo.Disarm(basestation)
-    print("result for /disarm = {}".format(result))
+    result = arlo.Arm(basestation)
+    return json.dumps(result)
 
 
 @app.route("/disarm", methods=['POST'])
 def disarm_request():
-    threading.Thread(target=disarm, args=(), kwargs={}).start()
-    return "ok"
+    result = arlo.Disarm(basestation)
+    return json.dumps(result)
 
 
 @app.route("/camera")
