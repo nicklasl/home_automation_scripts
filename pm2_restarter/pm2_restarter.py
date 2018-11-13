@@ -5,7 +5,7 @@ from flask import Flask, abort
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def restart():
     os.system('pm2 restart node-red')
     return "OK"
