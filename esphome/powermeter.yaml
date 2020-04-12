@@ -1,0 +1,41 @@
+esphome:
+  name: powermeter
+  platform: ESP8266
+  board: d1
+
+wifi:
+  ssid: "CHANGEME"
+  password: "CHANGEME"
+  power_save_mode: none
+  
+  ap:
+    ssid: "Powermeter Fallback Hotspot"
+    password: "meeep meep"
+
+captive_portal:
+
+mqtt: 
+  broker: 192.168.1.230
+
+sensor:
+  - platform: pulse_counter
+    pin: D4
+    name: "Electricity pulse sensor"
+binary_sensor:
+  - platform: gpio
+    pin: D5
+    name: "Garageporten"
+    device_class: garage_door
+  - platform: gpio
+    pin: D6
+    name: "Groventrén"
+    device_class: door
+
+# Enable logging
+logger:
+  #level: VERBOSE
+  #esp8266_store_log_strings_in_flash: False
+# Enable Home Assistant API
+api:
+
+ota:
