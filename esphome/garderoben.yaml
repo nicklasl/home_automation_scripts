@@ -1,0 +1,33 @@
+esphome:
+  name: garderoben
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: "CHANGEME"
+  password: "CHANGEME"
+
+mqtt: 
+  broker: 192.168.1.230
+
+dallas:
+  - pin: GPIO2
+    update_interval: 300s
+
+# Individual sensors
+sensor:
+  - platform: dallas
+    address: 0x4E04169492B8FF28
+    name: "inside_basement_food_storage"
+  - platform: dallas
+    address: 0xC5000006AD65A828
+    name: "inside_kitchen"
+
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
