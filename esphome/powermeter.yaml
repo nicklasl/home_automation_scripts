@@ -10,31 +10,73 @@ wifi:
   
   ap:
     ssid: "Powermeter Fallback Hotspot"
-    password: "meeep meep"
+    password: "CHANGEME"
 
 captive_portal:
 
 mqtt: 
   broker: 192.168.1.230
 
+dallas:
+  - pin: 14
+    update_interval: 300s
+
+time:
+  - platform: sntp
+    id: my_time
+  
 sensor:
-  - platform: pulse_counter
-    pin: D4
+  - id: my_watt_counter
+    platform: pulse_counter
+    pin: 2
     name: "Electricity pulse sensor"
-binary_sensor:
-  - platform: gpio
-    pin: D5
-    name: "Garageporten"
-    device_class: garage_door
-  - platform: gpio
-    pin: D6
-    name: "Groventrén"
-    device_class: door
+    update_interval: 300s
+    count_mode:
+      rising_edge: DISABLE
+      falling_edge: INCREMENT
+
+  - id: watts_consumed_last_5_min
+    platform: template
+    name: watts_consumed_last_5_min
+    unit_of_measurement: 'W'
+    update_interval: 300s
+    lambda: |-
+      return id(my_watt_counter).state * 5;
+  - id: average_kwh_last_5_min
+    platform: template
+    name: average_kwh_last_5_min
+    unit_of_measurement: 'kWH'
+    update_interval: 300s
+    lambda: |-
+      return (id(watts_consumed_last_5_min).state * (12 / 1000));
+
+  - platform: dallas
+    name: outside_north_east
+    address: 0x4D000006AE972228
+  - platform: dallas
+    name: outside_south_west
+    address: 0xD2000006AD2D5E28 
+  - platform: dallas
+    name: inside_basement
+    address: 0xF7000006ADD79628 
+  - platform: dallas
+    name: inside_basement_garage
+    address: 0x9B03168C866FFF28 
+  - platform: dallas
+    name: unknown_1wire_sensor
+    address: 0x630516944F79FF28  
+  - platform: dallas
+    name: heat_pump_return_flow
+    address: 0xBA041694D4C3FF28 
+  - platform: dallas
+    name: heat_pump_out_flow
+    address: 0xBB051694C61BFF28   
+    
 
 # Enable logging
 logger:
-  #level: VERBOSE
-  #esp8266_store_log_strings_in_flash: False
+  level: VERBOSE
+  esp8266_store_log_strings_in_flash: False
 # Enable Home Assistant API
 api:
 
