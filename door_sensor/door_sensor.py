@@ -20,7 +20,7 @@ basement_door_pin = 24
 # 23 = Green
 garage_door_pin = 23
 
-debug = True
+debug = False
 
 
 def load_cfg():
@@ -39,8 +39,8 @@ def setup():
     sleep_time = cfg['sleep_time']
     if debug: print "url={}".format(url)
     if debug: print "sleep_time={}".format(sleep_time)
-    GPIO.setup(basement_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(garage_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(basement_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(garage_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 def report(door, state_text):
@@ -78,13 +78,12 @@ def loop():
 
 
 def door_open(pin):
-    return GPIO.input(pin)
+    return not GPIO.input(pin)
 
 
 try:
     load_cfg()
     setup()
-    udp_reporter.start_reporting("door_sensor.py")
     loop()
 # Stop on Ctrl+C and clean up
 except KeyboardInterrupt:
