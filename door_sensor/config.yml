@@ -1,9 +1,13 @@
 api:
   host: eagle
   port: 1880
+  access-token: 1234
 
 door:
-  23: garage_door
-  24: basement_door
+  23: garagedorren
+  24: groventren
+friendly-name:
+  23: Garagedörren
+  24: Groventrén
 
 sleep_time: 2 #sleep time in seconds.

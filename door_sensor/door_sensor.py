@@ -30,35 +30,41 @@ def load_cfg():
 
 
 def setup():
-    global last_basement_door_state, last_garage_door_state, url, sleep_time
+    global last_basement_door_state, last_garage_door_state, host, port, headers, sleep_time
     last_basement_door_state = True
     last_garage_door_state = True
     host = cfg['api']['host']
     port = cfg['api']['port']
-    url = 'http://{}:{}/doorsensor'.format(host, port)
+    access_token = cfg['api']['access-token']
+    headers = {
+        'Authorization': 'Bearer {}'.format(access_token),
+        'Content-Type': 'application/json'
+    }
     sleep_time = cfg['sleep_time']
-    if debug: print "url={}".format(url)
     if debug: print "sleep_time={}".format(sleep_time)
     GPIO.setup(basement_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(garage_door_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
-def report(door, state_text):
+def report(door, friendly_name, state_text):
     try:
-        blob = {'door': door, 'state': state_text}
-        if debug: print "sending to server: {}".format(blob)
-        r = requests.post(url, data=blob)
+        url = 'http://{}:{}/api/states/binary_sensor.{}'.format(host, port, door)
+        payload = {"state": state_text, "attributes": {"friendly_name": friendly_name}}
+        
+        if debug: print "sending {} to url: {}".format(payload, url)
+        r = requests.post(url, json=payload, headers=headers)
     except IOError as e:
         if debug: print "error is {}".format(e)
 
 
 def report_async(pin, state):
     if state:
-        state_text = "open"
+        state_text = "on"
     else:
-        state_text = "closed"
+        state_text = "off"
     door = cfg['door'][pin]
-    thr = threading.Thread(target=report, args=(door, state_text,), kwargs={})
+    friendly_name = cfg['friendly-name'][pin]
+    thr = threading.Thread(target=report, args=(door, friendly_name, state_text,), kwargs={})
     thr.start()
 
 
