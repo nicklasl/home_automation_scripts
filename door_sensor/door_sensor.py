@@ -49,7 +49,7 @@ def setup():
 def report(door, friendly_name, state_text):
     try:
         url = 'http://{}:{}/api/states/binary_sensor.{}'.format(host, port, door)
-        payload = {"state": state_text, "attributes": {"friendly_name": friendly_name}}
+        payload = {"state": state_text, "attributes": {"device_class":"door", "friendly_name": friendly_name}}
         
         if debug: print "sending {} to url: {}".format(payload, url)
         r = requests.post(url, json=payload, headers=headers)
