@@ -10,7 +10,6 @@ import RPi.GPIO as GPIO
 import requests
 import time
 import yaml
-import reporting.udp_reporter as udp_reporter
 
 
 GPIO.setmode(GPIO.BCM)
@@ -77,7 +76,10 @@ def loop():
         if door_open(garage_door_pin) != last_garage_door_state:  # Only report if state has changed.
             report_async(garage_door_pin, door_open(garage_door_pin))
             if debug: print("Garage door state changed.")
-
+        if int(time.time()) % 900 == 0:
+            if debug: print("Running periodic report.")
+            report_async(basement_door_pin, door_open(basement_door_pin))
+            report_async(garage_door_pin, door_open(garage_door_pin))
         last_garage_door_state = door_open(garage_door_pin)
         last_basement_door_state = door_open(basement_door_pin)
         time.sleep(sleep_time)
